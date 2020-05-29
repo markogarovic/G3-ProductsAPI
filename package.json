@@ -1,0 +1,26 @@
+{
+  "name": "g3-productsapi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/markogarovic/G3-ProductsAPI.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/markogarovic/G3-ProductsAPI/issues"
+  },
+  "homepage": "https://github.com/markogarovic/G3-ProductsAPI#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "mongodb": "^3.5.8",
+    "mongoose": "^5.9.16",
+    "mongoose-type-email": "^1.0.12",
+    "mongoose-validator": "^2.1.0"
+  }
+}
