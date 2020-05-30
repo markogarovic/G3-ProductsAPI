@@ -43,11 +43,11 @@ const product = new mongoose.Schema(
             min: 1,
             max: 10
         },
-        // user:{
-        //     type: mongoose.Schema.Types.ObjectId,
-        //     required: true,
-        //     ref: "user"
-        // }
+        user:{
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "user"
+        }
     }
 )
 
