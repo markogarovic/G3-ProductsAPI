@@ -60,6 +60,10 @@ function update(UserToUpdate, query){
     })
 }
 
+// 7. dio domaceg
+
+
+
 module.exports = {
     findByusername,
     findAll,
