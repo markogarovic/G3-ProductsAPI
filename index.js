@@ -50,8 +50,17 @@ app.post('/product', async (req, res) => {
 })
 app.get('/products', async (req, res) => {
     try{
-        const products = await Product.findAll();
-        res.status(200).json(products)
+        if(Object.keys(req.query).length === 0){
+            const products = await Product.findAll();
+            res.status(200).json(products)
+        }else{
+            const limit = parseInt(req.query.limit);
+            const offset = parseInt(req.query.offset);
+
+            const product = await Product.findGroupOfProducts(limit,offset);
+            res.status(200).json(product);
+        }
+        
     } catch (error) {
         res.json(error)
     }
@@ -104,7 +113,63 @@ app.get('/users', async (req, res) => {
     }
 })
 
-
+app.get('/product_id/:id', async (req, res) => {
+    const productId = req.params.id;
+    try{
+        const product = await Product.findById(productId);
+        res.status(200).json(product);
+    } catch (error) {
+        res.json(error)
+    }
+})
+app.delete('/product_id/:id', async (req, res) => {
+    const productId = req.params.id;
+    try{
+        const product = await Product.deleteById(productId);
+        res.status(204).json(product);
+    } catch (error) {
+        res.json(error)
+    }
+})
+app.put('/product_id/:id', async (req, res) => {
+    const productId = req.params.id;
+    
+    const queryToUpdate = req.body;
+    try{
+        const product = await Product.updateById(productId, queryToUpdate);
+        res.status(204).json(product);
+    } catch (error) {
+        res.json(error)
+    }
+})
+app.put('/product_dec/:id', async (req, res) => {
+    const productId = req.params.id;
+    console.log(productId)
+    try{
+        const product = await Product.dec(productId);
+        res.status(204).json(product);
+    } catch (error) {
+        res.json(error)
+    }
+})
+app.put('/product_inc/:id', async (req, res) => {
+    const productId = req.params.id;
+    try{
+        const product = await Product.inc(productId);
+        res.status(204).json(product);
+    } catch (error) {
+        res.json(error)
+    }
+})
+app.get('/product_num/:id', async (req, res) => {
+    const productId = req.params.id;
+    try{
+        const product = await Product.numberOfProducts(productId);
+        res.status(200).json(product);
+    } catch (error) {
+        res.json(error)
+    }
+})
 
 connect(DB_URL)
   .then(() => app.listen(5000, () => {

@@ -12,7 +12,8 @@ const usernameValidator = [
 const passwordValidator = [
     validate({
         validator: 'matches',
-        arguments: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{5,25}$/
+        arguments: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{5,25}$/,
+        message:"Invalid password"
     }),
     validate({
         validator: 'isLength',
@@ -20,13 +21,7 @@ const passwordValidator = [
         message: 'Password should be between 5 and 25 characters'
     })
 ]
-const roleValidator = [
-    validate({
-        validator: 'matches',
-        arguments: /[01]/,
-        message: "Role should be 0 or 1"
-    })
-]
+
 const emailValidator = [
     validate({
         validator: 'matches',
@@ -34,6 +29,7 @@ const emailValidator = [
         message: "Invalid email"
     })
 ]
+
 const user = new mongoose.Schema(
     {
         username:{
@@ -50,11 +46,14 @@ const user = new mongoose.Schema(
         email: {
             type:String,
             unique: true,
-            validate: emailValidator
+            validate: emailValidator,
+            require: true
         },
         role: {
             type: Number,
-            validate: roleValidator
+            require: true,
+            min: 0,
+            max: 1
         },
         product:[{
             type: mongoose.Schema.Types.ObjectId,
