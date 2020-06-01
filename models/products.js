@@ -22,7 +22,6 @@ const product = new mongoose.Schema({
     required: true,
     unique: true,
     validate: nameValidator,
-    index: true,
   },
   description: {
     type: String,
@@ -30,6 +29,7 @@ const product = new mongoose.Schema({
   },
   image: {
     type: String,
+    required: false,
   },
   price: {
     type: Number,
@@ -49,6 +49,6 @@ const product = new mongoose.Schema({
     ref: "user",
   },
 });
-
+product.index({ name: 1 });
 const ProductModel = mongoose.model("product", product);
 module.exports = ProductModel;
