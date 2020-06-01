@@ -1,5 +1,6 @@
 const express = require("express");
 const { json, urlencoded } = require("body-parser");
+const multer = require("multer");
 
 const User = require("./controllers/users");
 const Product = require("./controllers/products");
@@ -7,8 +8,39 @@ const { connect } = require("./helpers");
 const { DB_URL } = require("./config");
 
 const app = express();
+//we are saying parse only requests at /uploads route
+app.use("/uploads", express.static("uploads")); //makes folder publicaly accessible
 app.use(urlencoded({ extended: true }));
 app.use(json());
+
+//how file gets stored
+const storage = multer.diskStorage({
+  //whrete to store file
+  destination: function (req, file, cb) {
+    cb(null, "./uploads"); //1.argument is potential error, 2.arg - path where we want to store file
+  },
+  //how to name file
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+    cb(null, true); //this stores the file
+  } else {
+    //reject a file
+    cb(null, false); //this ignores files and does not store it
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1024 * 1204 * 3,
+  },
+  fileFilter: fileFilter,
+});
 
 app.get("/product/:name", async (req, res) => {
   const productName = req.params.name;
@@ -39,8 +71,18 @@ app.put("/product/:name", async (req, res) => {
     res.json(error);
   }
 });
-app.post("/product", async (req, res) => {
-  const productToCreate = req.body;
+app.post("/product", upload.single("image"), async (req, res) => {
+  console.log(req.file);
+  //const productToCreate = req.body;
+  const productToCreate = {
+    _id: req.body._id,
+    name: req.body.name,
+    description: req.body.description,
+    price: req.body.price,
+    image: req.file.path,
+    quantity: req.body.quantity,
+    user: req.body.user,
+  };
   try {
     const product = await Product.create(productToCreate);
     res.status(201).json(product);
