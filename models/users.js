@@ -64,4 +64,5 @@ const user = new mongoose.Schema({
 });
 
 user.index({ username: 1 });
+
 module.exports = mongoose.model("user", user);

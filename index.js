@@ -6,12 +6,21 @@ const User = require("./controllers/users");
 const Product = require("./controllers/products");
 const { connect } = require("./helpers");
 const { DB_URL } = require("./config");
+const crypto = require("crypto");
 
 const app = express();
 //we are saying parse only requests at /uploads route
 app.use("/uploads", express.static("uploads")); //makes folder publicaly accessible
 app.use(urlencoded({ extended: true }));
 app.use(json());
+
+function hashPassword(psw) {
+  return crypto
+    .createHash("sha256")
+    .update(psw, "utf8")
+    .digest("base64")
+    .slice(0, 24);
+}
 
 //how file gets stored
 const storage = multer.diskStorage({
@@ -127,8 +136,9 @@ app.delete("/user/:username", async (req, res) => {
 });
 app.put("/user/:username", async (req, res) => {
   const userName = req.params.username;
-
+  //req.body.password = hashPassword(req.body.password);
   const queryToUpdate = req.body;
+  console.log("pass", queryToUpdate);
   try {
     const user = await User.update({ name: userName }, queryToUpdate);
     res.status(204).json(user);
@@ -137,7 +147,9 @@ app.put("/user/:username", async (req, res) => {
   }
 });
 app.post("/user", async (req, res) => {
+  req.body.password = hashPassword(req.body.password);
   const userToCreate = req.body;
+  console.log("user to add", userToCreate);
   try {
     const user = await User.create(userToCreate);
     res.status(201).json(user);
