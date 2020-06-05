@@ -3,7 +3,6 @@ const User = require("../models/users");
 function findByusername(username) {
     return new Promise((resolve, reject) => {
         try {
-            console.log(username)
             resolve(User.find({username : username}).exec())
         } catch (e) {
             console.log(e);
@@ -51,7 +50,7 @@ function deleteUser(UserToDelete){
 function update(UserToUpdate, query){
     return new Promise((resolve, reject) => {
         try {
-            resolve(User.findOneAndUpdate(UserToUpdate,query))
+            resolve(User.findOneAndUpdate({username:UserToUpdate},query))
         } catch (e) {
             console.log(e);
             reject(false)

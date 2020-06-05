@@ -85,11 +85,10 @@ app.delete('/user/:username', async (req, res) => {
     }
 })
 app.put('/user/:username', async (req, res) => {
-    const userName = req.params.username;
-    
+    const userName = req.params.username;  
     const queryToUpdate = req.body;
     try{
-        const user = await User.update({name:userName}, queryToUpdate);
+        const user = await User.update(userName,queryToUpdate);
         res.status(204).json(user);
     } catch (error) {
         res.json(error)
@@ -123,8 +122,8 @@ app.get('/product_id/:id', async (req, res) => {
     }
 })
 app.delete('/product_id/:id', async (req, res) => {
-    const productId = req.params.id;
     try{
+        const productId = req.params.id;
         const product = await Product.deleteById(productId);
         res.status(204).json(product);
     } catch (error) {
@@ -132,10 +131,10 @@ app.delete('/product_id/:id', async (req, res) => {
     }
 })
 app.put('/product_id/:id', async (req, res) => {
-    const productId = req.params.id;
-    
-    const queryToUpdate = req.body;
     try{
+        const productId = req.params.id;
+        const queryToUpdate = req.body;
+        console.log(queryToUpdate)
         const product = await Product.updateById(productId, queryToUpdate);
         res.status(204).json(product);
     } catch (error) {
