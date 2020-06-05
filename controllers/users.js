@@ -1,9 +1,9 @@
 const User = require("../models/users");
 
-function findByusername(username) {
-<<<<<<< HEAD
+function findByUsername(username) {
     return new Promise((resolve, reject) => {
         try {
+           
             resolve(User.find({username : username}).exec())
         } catch (e) {
             console.log(e);
@@ -11,17 +11,6 @@ function findByusername(username) {
         }
 
     })
-=======
-  return new Promise((resolve, reject) => {
-    try {
-      console.log(username);
-      resolve(User.find({ username: username }).exec());
-    } catch (e) {
-      console.log(e);
-      reject(false);
-    }
-  });
->>>>>>> 8a5aef99312475c68224564d723e0ed884580b4e
 }
 
 function findAll() {
@@ -49,14 +38,14 @@ function create(UserToCreate) {
 function deleteUser(UserToDelete) {
   return new Promise((resolve, reject) => {
     try {
-      resolve(User.findOneAndDelete(UserToDelete));
+      resolve(User.findOneAndDelete({username:UserToDelete}));
     } catch (e) {
       console.log(e);
       reject(false);
     }
   });
 }
-<<<<<<< HEAD
+
 function update(UserToUpdate, query){
     return new Promise((resolve, reject) => {
         try {
@@ -67,17 +56,7 @@ function update(UserToUpdate, query){
         }
 
     })
-=======
-function update(UserToUpdate, query) {
-  return new Promise((resolve, reject) => {
-    try {
-      resolve(User.findOneAndUpdate(UserToUpdate, query));
-    } catch (e) {
-      console.log(e);
-      reject(false);
-    }
-  });
->>>>>>> 8a5aef99312475c68224564d723e0ed884580b4e
+
 }
 
 // 7. dio domaceg
@@ -108,7 +87,7 @@ function getProductField(username, id) {
 }
 */
 module.exports = {
-  findByusername,
+  findByUsername,
   findAll,
   create,
   delete: deleteUser,

@@ -44,7 +44,6 @@ function deleteProduct(ProductToDelete) {
     }
   });
 }
-<<<<<<< HEAD
 function update(ProductToUpdate, query){
     return new Promise((resolve, reject) => {
         try {
@@ -55,17 +54,6 @@ function update(ProductToUpdate, query){
         }
 
     })
-=======
-function update(ProductToUpdate, query) {
-  return new Promise((resolve, reject) => {
-    try {
-      resolve(Product.findOneAndUpdate(ProductToUpdate, query));
-    } catch (e) {
-      console.log(e);
-      reject(false);
-    }
-  });
->>>>>>> 8a5aef99312475c68224564d723e0ed884580b4e
 }
 
 // 7. zadatak sa domaceg
@@ -92,7 +80,6 @@ function deleteById(id) {
     }
   });
 }
-<<<<<<< HEAD
 function updateById(id,query){
     return new Promise((resolve, reject) => {
         try {
@@ -102,17 +89,6 @@ function updateById(id,query){
             reject(false)
         }
     })
-=======
-function updateById(id, query) {
-  return new Promise((resolve, reject) => {
-    try {
-      resolve(Product.update(findById(id), query));
-    } catch (e) {
-      console.log(e);
-      reject(false);
-    }
-  });
->>>>>>> 8a5aef99312475c68224564d723e0ed884580b4e
 }
 function decProductNumber(id) {
   return new Promise((resolve, reject) => {
