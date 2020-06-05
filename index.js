@@ -118,8 +118,9 @@ app.get("/products", async (req, res) => {
 
 app.get("/user/:username", async (req, res) => {
   const userName = req.params.username;
+ 
   try {
-    const user = await User.findByName(userName);
+    const user = await User.findByUsername(userName);
     res.status(200).json(user);
   } catch (error) {
     res.json(error);
@@ -128,7 +129,7 @@ app.get("/user/:username", async (req, res) => {
 app.delete("/user/:username", async (req, res) => {
   const userName = req.params.username;
   try {
-    const user = await User.delete({ username: userName });
+    const user = await User.delete(userName);
     res.status(204).json(user);
   } catch (error) {
     res.json(error);
@@ -140,22 +141,43 @@ app.put("/user/:username", async (req, res) => {
   const queryToUpdate = req.body;
   console.log("pass", queryToUpdate);
   try {
-    const user = await User.update({ name: userName }, queryToUpdate);
+    const user = await User.update(userName, queryToUpdate);
     res.status(204).json(user);
   } catch (error) {
     res.json(error);
   }
 });
 app.post("/user", async (req, res) => {
-  req.body.password = hashPassword(req.body.password);
-  const userToCreate = req.body;
-  console.log("user to add", userToCreate);
-  try {
-    const user = await User.create(userToCreate);
-    res.status(201).json(user);
-  } catch (error) {
-    res.json(error);
-  }
+    try {
+        function checkPassword(){
+            let password = req.body.password;
+            var digit = false;
+            var lower = false;
+            var upper = false;
+            if(password.length < 5 || password.length > 25){
+                return false
+            }
+            for(let i = 0;i < password.length;i++){
+                if(password[i] >= 'a' && password[i] <= 'z'){
+                    lower = true
+                }else if(password[i] >= 'A' && password[i] <= 'Z'){
+                    upper = true
+                }else if(password[i] >= '0' && password[i] <= '9'){
+                    digit = true
+                }
+            }
+            return digit && upper && lower
+        }
+        if(!checkPassword()){
+            throw "Invalid Password"
+        }
+        req.body.password = hashPassword(req.body.password);
+        const userToCreate = req.body;
+        const user = await User.create(userToCreate);
+        res.status(201).json(user);
+    } catch (error) {
+        res.json(error);
+    }
 });
 app.get("/users", async (req, res) => {
   try {
@@ -197,7 +219,6 @@ app.put("/product_id/:id", async (req, res) => {
 });
 app.put("/product_dec/:id", async (req, res) => {
   const productId = req.params.id;
-  console.log(productId);
   try {
     const product = await Product.dec(productId);
     res.status(204).json(product);

@@ -9,18 +9,7 @@ const usernameValidator = [
     message: "Username should be between 3 and 20 characters",
   }),
 ];
-const passwordValidator = [
-  validate({
-    validator: "matches",
-    arguments: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{5,25}$/,
-    message: "Invalid password",
-  }),
-  validate({
-    validator: "isLength",
-    arguments: [5, 25],
-    message: "Password should be between 5 and 25 characters",
-  }),
-];
+
 
 const emailValidator = [
   validate({
@@ -40,7 +29,6 @@ const user = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    validate: passwordValidator,
   },
   email: {
     type: mongoose.SchemaTypes.Email,
