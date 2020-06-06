@@ -8,6 +8,12 @@ const fs = require('fs');
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 require('dotenv').config();
 
+const User = require("./controllers/users");
+const Product = require("./controllers/products");
+const { connect } = require("./helpers");
+const { DB_URL } = require("./config");
+const crypto = require("crypto");
+
 function sendMail(toAdminEmail){
   var transporter = nodemailer.createTransport({
     service: 'gmail', 
@@ -35,12 +41,6 @@ function sendMail(toAdminEmail){
   });
 
 }
-
-const User = require("./controllers/users");
-const Product = require("./controllers/products");
-const { connect } = require("./helpers");
-const { DB_URL } = require("./config");
-const crypto = require("crypto");
 
 const app = express();
 app.use("/uploads", express.static("uploads"));
@@ -336,6 +336,19 @@ app.delete("/user", async (req, res) => {
   }
 });
 
+app.get("/profit", async (req,res)=>{
+  try {
+    var users = await Product.profit();
+    for(let i = 0;i < users.length;i++){
+      const temp = await User.findById(users[i])
+      users[i]._id = temp.username
+    }
+    res.status(200).json(users);
+  } catch (error) {
+    console.log("error", error);
+    res.json(error);
+  }
+})
 //updating product field in user table
 app.patch("/user", async (req, res) => {
   const { username, id } = req.query;
@@ -356,6 +369,15 @@ app.patch("/user", async (req, res) => {
     res.json(error);
   }
 });
+
+
+
+// Odraditi i grupisanje (može odvojena funkcija van APIa) tako da ta funkcija
+// vraća za svakog korisnika moguću zaradu od proizvoda koji su dodati od
+// strane konkretnog korisnika
+
+
+
 
 connect(DB_URL)
   .then(() =>

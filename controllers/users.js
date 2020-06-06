@@ -97,6 +97,8 @@ function update(UserToUpdate, query) {
   });
 }
 
+
+
 // 7. dio domaceg
 /*
 function addProductField(username, id) {
