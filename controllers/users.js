@@ -1,18 +1,30 @@
 const User = require("../models/users");
 
 function findByUsername(username) {
-    return new Promise((resolve, reject) => {
-        try {
-           
-            resolve(User.find({username : username}).exec())
-        } catch (e) {
-            console.log(e);
-            reject(false)
-        }
-
-    })
+  return new Promise((resolve, reject) => {
+    try {
+      resolve(User.find({ username: username }).exec());
+    } catch (e) {
+      console.log(e);
+      reject(false);
+    }
+  });
 }
-
+function findProductAndUpdate(username, id) {
+  return new Promise((resolve, reject) => {
+    try {
+      resolve(
+        User.findOneAndUpdate(
+          { username: username },
+          { $push: { product: id } }
+        ).exec()
+      );
+    } catch (e) {
+      console.log(e);
+      reject(false);
+    }
+  });
+}
 function findAll() {
   return new Promise((resolve, reject) => {
     try {
@@ -38,7 +50,7 @@ function create(UserToCreate) {
 function deleteUser(UserToDelete) {
   return new Promise((resolve, reject) => {
     try {
-      resolve(User.findOneAndDelete({username:UserToDelete}));
+      resolve(User.findOneAndDelete({ username: UserToDelete }));
     } catch (e) {
       console.log(e);
       reject(false);
@@ -46,17 +58,15 @@ function deleteUser(UserToDelete) {
   });
 }
 
-function update(UserToUpdate, query){
-    return new Promise((resolve, reject) => {
-        try {
-            resolve(User.findOneAndUpdate({username:UserToUpdate},query))
-        } catch (e) {
-            console.log(e);
-            reject(false)
-        }
-
-    })
-
+function update(UserToUpdate, query) {
+  return new Promise((resolve, reject) => {
+    try {
+      resolve(User.findOneAndUpdate({ username: UserToUpdate }, query));
+    } catch (e) {
+      console.log(e);
+      reject(false);
+    }
+  });
 }
 
 // 7. dio domaceg
@@ -92,4 +102,5 @@ module.exports = {
   create,
   delete: deleteUser,
   update,
+  findProductAndUpdate,
 };
