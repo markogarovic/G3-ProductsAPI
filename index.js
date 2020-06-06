@@ -9,8 +9,7 @@ const { DB_URL } = require("./config");
 const crypto = require("crypto");
 
 const app = express();
-//we are saying parse only requests at /uploads route
-app.use("/uploads", express.static("uploads")); //makes folder publicaly accessible
+app.use("/uploads", express.static("uploads"));
 app.use(urlencoded({ extended: true }));
 app.use(json());
 
@@ -22,13 +21,10 @@ function hashPassword(psw) {
     .slice(0, 24);
 }
 
-//how file gets stored
 const storage = multer.diskStorage({
-  //whrete to store file
   destination: function (req, file, cb) {
-    cb(null, "./uploads"); //1.argument is potential error, 2.arg - path where we want to store file
+    cb(null, "./uploads");
   },
-  //how to name file
   filename: function (req, file, cb) {
     cb(null, file.originalname);
   },
@@ -36,10 +32,9 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
-    cb(null, true); //this stores the file
+    cb(null, true);
   } else {
-    //reject a file
-    cb(null, false); //this ignores files and does not store it
+    cb(null, false);
   }
 };
 
@@ -82,7 +77,6 @@ app.put("/product/:name", async (req, res) => {
 });
 app.post("/product", upload.single("image"), async (req, res) => {
   console.log(req.file);
-  //const productToCreate = req.body;
   const productToCreate = {
     _id: req.body._id,
     name: req.body.name,
@@ -118,7 +112,7 @@ app.get("/products", async (req, res) => {
 
 app.get("/user/:username", async (req, res) => {
   const userName = req.params.username;
- 
+
   try {
     const user = await User.findByUsername(userName);
     res.status(200).json(user);
@@ -137,7 +131,7 @@ app.delete("/user/:username", async (req, res) => {
 });
 app.put("/user/:username", async (req, res) => {
   const userName = req.params.username;
-  //req.body.password = hashPassword(req.body.password);
+  req.body.password = hashPassword(req.body.password);
   const queryToUpdate = req.body;
   console.log("pass", queryToUpdate);
   try {
@@ -147,37 +141,37 @@ app.put("/user/:username", async (req, res) => {
     res.json(error);
   }
 });
-app.post("/user", async (req, res) => {
-    try {
-        function checkPassword(){
-            let password = req.body.password;
-            var digit = false;
-            var lower = false;
-            var upper = false;
-            if(password.length < 5 || password.length > 25){
-                return false
-            }
-            for(let i = 0;i < password.length;i++){
-                if(password[i] >= 'a' && password[i] <= 'z'){
-                    lower = true
-                }else if(password[i] >= 'A' && password[i] <= 'Z'){
-                    upper = true
-                }else if(password[i] >= '0' && password[i] <= '9'){
-                    digit = true
-                }
-            }
-            return digit && upper && lower
-        }
-        if(!checkPassword()){
-            throw "Invalid Password"
-        }
-        req.body.password = hashPassword(req.body.password);
-        const userToCreate = req.body;
-        const user = await User.create(userToCreate);
-        res.status(201).json(user);
-    } catch (error) {
-        res.json(error);
+function checkPassword() {
+  let password = req.body.password;
+  let digit = false;
+  let lower = false;
+  let upper = false;
+  if (password.length < 5 || password.length > 25) {
+    return false;
+  }
+  for (let i = 0; i < password.length; i++) {
+    if (password[i] >= "a" && password[i] <= "z") {
+      lower = true;
+    } else if (password[i] >= "A" && password[i] <= "Z") {
+      upper = true;
+    } else if (password[i] >= "0" && password[i] <= "9") {
+      digit = true;
     }
+  }
+  return digit && upper && lower;
+}
+app.post("/user", async (req, res) => {
+  try {
+    if (!checkPassword()) {
+      throw "Invalid Password";
+    }
+    req.body.password = hashPassword(req.body.password);
+    const userToCreate = req.body;
+    const user = await User.create(userToCreate);
+    res.status(201).json(user);
+  } catch (error) {
+    res.json(error);
+  }
 });
 app.get("/users", async (req, res) => {
   try {
@@ -241,6 +235,27 @@ app.get("/product_num/:id", async (req, res) => {
     const product = await Product.numberOfProducts(productId);
     res.status(200).json(product);
   } catch (error) {
+    res.json(error);
+  }
+});
+
+//7. user queries
+app.put("/user", async (req, res) => {
+  const { username, id } = req.query;
+  console.log("username", username);
+  console.log("id", id);
+  if (!checkPassword()) {
+    throw "Invalid Password";
+  }
+  try {
+    const product = await Product.findProductId(id); //id je name u tabeli Product
+    let productID = product[0]._id;
+    console.log(typeof productID);
+    const user = await User.findProductAndUpdate(username, productID);
+    console.log(user);
+    res.status(204).json(user);
+  } catch (error) {
+    console.log("error", error);
     res.json(error);
   }
 });

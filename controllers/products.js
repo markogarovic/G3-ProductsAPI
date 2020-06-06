@@ -44,16 +44,25 @@ function deleteProduct(ProductToDelete) {
     }
   });
 }
-function update(ProductToUpdate, query){
-    return new Promise((resolve, reject) => {
-        try {
-            resolve(Product.findOneAndUpdate({name:ProductToUpdate},query))
-        } catch (e) {
-            console.log(e);
-            reject(false)
-        }
-
-    })
+function update(ProductToUpdate, query) {
+  return new Promise((resolve, reject) => {
+    try {
+      resolve(Product.findOneAndUpdate({ name: ProductToUpdate }, query));
+    } catch (e) {
+      console.log(e);
+      reject(false);
+    }
+  });
+}
+function findProductId(productName) {
+  return new Promise((resolve, reject) => {
+    try {
+      resolve(Product.find({ name: productName }, { _id: 1 }).exec());
+    } catch (e) {
+      console.log(e);
+      reject(false);
+    }
+  });
 }
 
 // 7. zadatak sa domaceg
@@ -80,15 +89,15 @@ function deleteById(id) {
     }
   });
 }
-function updateById(id,query){
-    return new Promise((resolve, reject) => {
-        try {
-            resolve(Product.findOneAndUpdate({_id:id},query))
-        } catch (e) {
-            console.log(e);
-            reject(false)
-        }
-    })
+function updateById(id, query) {
+  return new Promise((resolve, reject) => {
+    try {
+      resolve(Product.findOneAndUpdate({ _id: id }, query));
+    } catch (e) {
+      console.log(e);
+      reject(false);
+    }
+  });
 }
 function decProductNumber(id) {
   return new Promise((resolve, reject) => {
@@ -163,4 +172,5 @@ module.exports = {
   inc: incProductNumber,
   numberOfProducts,
   findGroupOfProducts,
+  findProductId,
 };
