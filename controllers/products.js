@@ -159,6 +159,34 @@ function findGroupOfProducts(limit, offset) {
   });
 }
 
+function profit() {
+  return new Promise((resolve, reject) => {
+    try {
+      
+      resolve(Product.aggregate([
+        {
+          $match:{}
+        },
+        {
+          $group:
+          {
+            _id:"$user",
+            profit: { $sum: { $multiply: [ "$price", "$quantity" ] } }
+          }
+        }
+    ]))
+  
+    } catch (e) {
+      console.log(e);
+      reject(false);
+    }
+  });
+}
+
+// Odraditi i grupisanje (može odvojena funkcija van APIa) tako da ta funkcija
+// vraća za svakog korisnik moguću zaradu od proizvoda koji su dodati od
+// strane konkretnog korisnika
+
 module.exports = {
   findByName,
   findAll,
@@ -173,4 +201,5 @@ module.exports = {
   numberOfProducts,
   findGroupOfProducts,
   findProductId,
+  profit
 };
