@@ -59,6 +59,23 @@ function deleteUser(UserToDelete) {
   });
 }
 
+function deleteProductField(userName, productField) {
+  return new Promise((resolve, reject) => {
+    try {
+      resolve(
+        User.update(
+          { username: userName },
+          { $pull: { product: { $in: [productField] } } },
+          { new: true }
+        ).exec()
+      );
+    } catch (e) {
+      console.log(e);
+      reject(false);
+    }
+  });
+}
+
 function update(UserToUpdate, query) {
   return new Promise((resolve, reject) => {
     try {
@@ -104,4 +121,5 @@ module.exports = {
   delete: deleteUser,
   update,
   findProductAndUpdate,
+  deleteProductField,
 };
