@@ -148,7 +148,7 @@ app.put("/user/:username", async (req, res) => {
   }
 });
 app.post("/user", async (req, res) => {
-    try {
+  try {
         function checkPassword(){
             let password = req.body.password;
             var digit = false;
