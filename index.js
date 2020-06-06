@@ -274,6 +274,23 @@ app.get("/user", async (req, res) => {
   }
 });
 
+app.delete("/user", async (req, res) => {
+  const { username, id } = req.query;
+  console.log("username", username);
+  console.log("id", id);
+  try {
+    const product = await Product.findProductId(id); //id je name u tabeli Product
+    let productID = product[0];
+    console.log("productID", productID);
+
+    const user = await User.deleteProductField(username, productID);
+    console.log(user);
+    res.status(204).json(user);
+  } catch (error) {
+    console.log("error", error);
+    res.json(error);
+  }
+});
 connect(DB_URL)
   .then(() =>
     app.listen(5000, () => {
