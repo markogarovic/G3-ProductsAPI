@@ -248,8 +248,7 @@ app.put("/user", async (req, res) => {
   console.log("username", username);
   console.log("id", id);
   try {
-    const product = await Product.findProductId(id); //id je name u tabeli Product
-    let productID = product;
+    let productID = await Product.findProductId(id); //id je name u tabeli Product
     console.log("productID", productID);
     const user = await User.findProductAndUpdate(username, productID);
     console.log(user);
@@ -267,7 +266,7 @@ app.get("/user", async (req, res) => {
     const user = await User.findByUsername(username);
     let productID = user[0].product;
     console.log("niz id-ijeva za usera:", productID);
-    res.status(204).json(user);
+    res.status(200).json(user);
   } catch (error) {
     console.log("error", error);
     res.json(error);
@@ -291,6 +290,28 @@ app.delete("/user", async (req, res) => {
     res.json(error);
   }
 });
+
+//updating product field in user table
+app.patch("/user", async (req, res) => {
+  const { username, id } = req.query;
+  console.log("username", username);
+  console.log("id", id);
+
+  try {
+    const user = await User.findByUsername(username);
+    console.log("user", user); //nama treba user.product
+    let productID = await Product.findProductId(id);
+    console.log("productID", productID);
+    const productField = await User.update(username, {
+      $set: { product: productID },
+    });
+    res.status(204).json(user);
+  } catch (error) {
+    console.log("error", error);
+    res.json(error);
+  }
+});
+
 connect(DB_URL)
   .then(() =>
     app.listen(5000, () => {
