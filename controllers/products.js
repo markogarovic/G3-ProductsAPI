@@ -162,20 +162,19 @@ function findGroupOfProducts(limit, offset) {
 function profit() {
   return new Promise((resolve, reject) => {
     try {
-      
-      resolve(Product.aggregate([
-        {
-          $match:{}
-        },
-        {
-          $group:
+      resolve(
+        Product.aggregate([
           {
-            _id:"$user",
-            profit: { $sum: { $multiply: [ "$price", "$quantity" ] } }
-          }
-        }
-    ]))
-  
+            $match: {},
+          },
+          {
+            $group: {
+              _id: "$user",
+              profit: { $sum: { $multiply: ["$price", "$quantity"] } },
+            },
+          },
+        ])
+      );
     } catch (e) {
       console.log(e);
       reject(false);
@@ -201,5 +200,5 @@ module.exports = {
   numberOfProducts,
   findGroupOfProducts,
   findProductId,
-  profit
+  profit,
 };

@@ -1,6 +1,6 @@
 const User = require("../models/users");
 
-function findById(id){
+function findById(id) {
   return new Promise((resolve, reject) => {
     try {
       resolve(User.findById(id).exec());
@@ -97,35 +97,6 @@ function update(UserToUpdate, query) {
   });
 }
 
-
-
-// 7. dio domaceg
-/*
-function addProductField(username, id) {
-  return new Promise((resolve, reject) => {
-    try {
-      let userFound = findByusername(username);
-      resolve(User.findOneAndUpdate(userFound, query));
-    } catch (e) {
-      console.log(e);
-      reject(false);
-    }
-  });
-}
-
-function getProductField(username, id) {
-  return new Promise((resolve, reject) => {
-    try {
-      let userFound = findByusername(username);
-      resolve(userFound.product.push(id));
-      resolve();
-    } catch (e) {
-      console.log(e);
-      reject(false);
-    }
-  });
-}
-*/
 module.exports = {
   findById,
   findByUsername,

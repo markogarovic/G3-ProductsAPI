@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/markogarovic/G3-ProductsAPI#readme",
   "dependencies": {
+    "bcrypt": "^4.0.1",
     "body-parser": "^1.19.0",
     "crypto": "^1.0.1",
     "dotenv": "^8.2.0",

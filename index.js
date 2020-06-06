@@ -1,45 +1,45 @@
 const express = require("express");
 const { json, urlencoded } = require("body-parser");
 const multer = require("multer");
-const nodemailer = require('nodemailer');
-const json2csv = require('json2csv').parse;
-const fs = require('fs');
+const nodemailer = require("nodemailer");
+const json2csv = require("json2csv").parse;
+const fs = require("fs");
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-require('dotenv').config();
+require("dotenv").config();
 
 const User = require("./controllers/users");
 const Product = require("./controllers/products");
 const { connect } = require("./helpers");
 const { DB_URL } = require("./config");
-const crypto = require("crypto");
+//const crypto = require("crypto");
+const bcrypt = require("bcrypt");
 
-function sendMail(toAdminEmail){
+function sendMail(toAdminEmail) {
   var transporter = nodemailer.createTransport({
-    service: 'gmail', 
+    service: "gmail",
     auth: {
-      user: 'wordtopdf000@gmail.com',
-      pass: process.env.PASSWORD
-    }
+      user: "wordtopdf000@gmail.com",
+      pass: process.env.PASSWORD,
+    },
   });
   var mailOptions = {
     from: `wordtopdf000@gmail.com`,
     to: `${toAdminEmail}`,
-    subject: 'Product created',
+    subject: "Product created",
     attachments: [
-        { 
-            path: `./resources/product.csv`
-        }
-    ]
+      {
+        path: `./resources/product.csv`,
+      },
+    ],
   };
-  transporter.sendMail(mailOptions, function(error, info){
+  transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
       console.log(error);
     } else {
-      console.log('Email sent: ' + info.response);
+      console.log("Email sent: " + info.response);
     }
   });
-
 }
 
 const app = express();
@@ -47,6 +47,7 @@ app.use("/uploads", express.static("uploads"));
 app.use(urlencoded({ extended: true }));
 app.use(json());
 
+/*
 function hashPassword(psw) {
   return crypto
     .createHash("sha256")
@@ -54,7 +55,7 @@ function hashPassword(psw) {
     .digest("base64")
     .slice(0, 24);
 }
-
+*/
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "./uploads");
@@ -110,23 +111,32 @@ app.put("/product/:name", async (req, res) => {
   }
 });
 app.post("/product", upload.single("image"), async (req, res) => {
-  const productToCreate = req.body
+  const productToCreate = req.body;
   try {
     const product = await Product.create(productToCreate);
-    
+
     //Niz admin mailova
     const users = await User.findAll();
 
     //kod za slanje mail-a adminima
-    for(let i= 0; i < users.length;i++){
-      if(users[i].role === 1){
+    for (let i = 0; i < users.length; i++) {
+      if (users[i].role === 1) {
         try {
-          let temp = await User.findById(productToCreate.user)
+          let temp = await User.findById(productToCreate.user);
           productToCreate.user = temp.username;
-          var csv = json2csv(productToCreate, { fields: ["name", "description", "price", "image", "quantity", "user" ]});
+          var csv = json2csv(productToCreate, {
+            fields: [
+              "name",
+              "description",
+              "price",
+              "image",
+              "quantity",
+              "user",
+            ],
+          });
           fs.writeFileSync("./resources/product.csv", csv);
           console.log(csv);
-          sendMail(users[i].email)
+          sendMail(users[i].email);
         } catch (err) {
           console.error(err);
         }
@@ -174,23 +184,8 @@ app.delete("/user/:username", async (req, res) => {
     res.json(error);
   }
 });
-app.put("/user/:username", async (req, res) => {
-  const userName = req.params.username;
-  req.body.password = hashPassword(req.body.password);
-  const queryToUpdate = req.body;
-  console.log("pass", queryToUpdate);
-  if (!checkPassword()) {
-    throw "Invalid Password";
-  }
-  try {
-    const user = await User.update(userName, queryToUpdate);
-    res.status(204).json(user);
-  } catch (error) {
-    res.json(error);
-  }
-});
-function checkPassword() {
-  let password = req.body.password;
+function checkPassword(password) {
+  //let password = req.body.password;
   let digit = false;
   let lower = false;
   let upper = false;
@@ -208,16 +203,75 @@ function checkPassword() {
   }
   return digit && upper && lower;
 }
-app.post("/user", async (req, res) => {
+
+app.put("/user/:username", (req, res) => {
+  const userName = req.params.username;
+  if (req.body.password !== undefined && !checkPassword(req.body.password)) {
+    throw "Invalid Password";
+  }
+  const queryToUpdate = req.body;
+  console.log("pass", req.body.password);
   try {
-    if(!checkPassword()){
-        throw "Invalid Password"
+    function updateFields() {
+      return User.update(userName, queryToUpdate)
+        .then((user) => {
+          console.log("User successfuly updated");
+          res.status(204).json(user);
+        })
+        .catch((e) => {
+          console.log(error);
+          res.json(error);
+        });
     }
-    req.body.password = hashPassword(req.body.password);
-    const userToCreate = req.body;
-    const user = await User.create(userToCreate);
-    res.status(201).json(user);
+    if (req.body.password === undefined) {
+      updateFields();
+      return;
+    }
+    bcrypt.hash(req.body.password, 10, (err, hash) => {
+      if (err) {
+        return res.status(500).json({
+          error: err,
+        });
+      } else {
+        req.body.password = hash.slice(0, 24);
+        console.log("pass nakon hash", req.body.password);
+        updateFields();
+      }
+    });
   } catch (error) {
+    console.log(error);
+    res.json(error);
+  }
+});
+
+app.post("/user", (req, res) => {
+  try {
+    if (!checkPassword(req.body.password)) {
+      throw "Invalid Password";
+    }
+    console.log("pass prije hassh", req.body.password);
+    bcrypt.hash(req.body.password, 10, (err, hash) => {
+      if (err) {
+        return res.status(500).json({
+          error: err,
+        });
+      } else {
+        req.body.password = hash.slice(0, 24);
+        console.log("pass nakon hash", req.body.password);
+        const userToCreate = req.body;
+        User.create(userToCreate)
+          .then((user) => {
+            console.log("User successfuly created");
+            res.status(201).json(user);
+          })
+          .catch((e) => {
+            console.log(error);
+            res.json(error);
+          });
+      }
+    });
+  } catch (error) {
+    console.log(error);
     res.json(error);
   }
 });
@@ -336,19 +390,20 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.get("/profit", async (req,res)=>{
+app.get("/profit", async (req, res) => {
   try {
     var users = await Product.profit();
-    for(let i = 0;i < users.length;i++){
-      const temp = await User.findById(users[i])
-      users[i]._id = temp.username
+    for (let i = 0; i < users.length; i++) {
+      const temp = await User.findById(users[i]);
+      users[i]._id = temp.username;
     }
     res.status(200).json(users);
   } catch (error) {
     console.log("error", error);
     res.json(error);
   }
-})
+});
+
 //updating product field in user table
 app.patch("/user", async (req, res) => {
   const { username, id } = req.query;
@@ -370,14 +425,9 @@ app.patch("/user", async (req, res) => {
   }
 });
 
-
-
 // Odraditi i grupisanje (može odvojena funkcija van APIa) tako da ta funkcija
 // vraća za svakog korisnika moguću zaradu od proizvoda koji su dodati od
 // strane konkretnog korisnika
-
-
-
 
 connect(DB_URL)
   .then(() =>
