@@ -16,7 +16,8 @@ function findProductAndUpdate(username, id) {
       resolve(
         User.findOneAndUpdate(
           { username: username },
-          { $push: { product: id } }
+          { $push: { product: id } },
+          { new: true }
         ).exec()
       );
     } catch (e) {

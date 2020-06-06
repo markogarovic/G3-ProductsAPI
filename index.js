@@ -134,6 +134,9 @@ app.put("/user/:username", async (req, res) => {
   req.body.password = hashPassword(req.body.password);
   const queryToUpdate = req.body;
   console.log("pass", queryToUpdate);
+  if (!checkPassword()) {
+    throw "Invalid Password";
+  }
   try {
     const user = await User.update(userName, queryToUpdate);
     res.status(204).json(user);
@@ -244,15 +247,26 @@ app.put("/user", async (req, res) => {
   const { username, id } = req.query;
   console.log("username", username);
   console.log("id", id);
-  if (!checkPassword()) {
-    throw "Invalid Password";
-  }
   try {
     const product = await Product.findProductId(id); //id je name u tabeli Product
-    let productID = product[0]._id;
-    console.log(typeof productID);
+    let productID = product;
+    console.log("productID", productID);
     const user = await User.findProductAndUpdate(username, productID);
     console.log(user);
+    res.status(204).json(user);
+  } catch (error) {
+    console.log("error", error);
+    res.json(error);
+  }
+});
+
+app.get("/user", async (req, res) => {
+  const { username } = req.query;
+  console.log("username", username);
+  try {
+    const user = await User.findByUsername(username);
+    let productID = user[0].product;
+    console.log("niz id-ijeva za usera:", productID);
     res.status(204).json(user);
   } catch (error) {
     console.log("error", error);
