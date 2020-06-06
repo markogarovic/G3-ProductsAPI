@@ -1,6 +1,40 @@
 const express = require("express");
 const { json, urlencoded } = require("body-parser");
 const multer = require("multer");
+const nodemailer = require('nodemailer');
+const json2csv = require('json2csv').parse;
+const fs = require('fs');
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+require('dotenv').config();
+
+function sendMail(toAdminEmail){
+  var transporter = nodemailer.createTransport({
+    service: 'gmail', 
+    auth: {
+      user: 'wordtopdf000@gmail.com',
+      pass: process.env.PASSWORD
+    }
+  });
+  var mailOptions = {
+    from: `wordtopdf000@gmail.com`,
+    to: `${toAdminEmail}`,
+    subject: 'Product created',
+    attachments: [
+        { 
+            path: `./resources/product.csv`
+        }
+    ]
+  };
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+
+}
 
 const User = require("./controllers/users");
 const Product = require("./controllers/products");
@@ -76,18 +110,29 @@ app.put("/product/:name", async (req, res) => {
   }
 });
 app.post("/product", upload.single("image"), async (req, res) => {
-  console.log(req.file);
-  const productToCreate = {
-    _id: req.body._id,
-    name: req.body.name,
-    description: req.body.description,
-    price: req.body.price,
-    image: req.file.path,
-    quantity: req.body.quantity,
-    user: req.body.user,
-  };
+  const productToCreate = req.body
   try {
     const product = await Product.create(productToCreate);
+    
+    //Niz admin mailova
+    const users = await User.findAll();
+
+    //kod za slanje mail-a adminima
+    for(let i= 0; i < users.length;i++){
+      if(users[i].role === 1){
+        try {
+          let temp = await User.findById(productToCreate.user)
+          productToCreate.user = temp.username;
+          var csv = json2csv(productToCreate, { fields: ["name", "description", "price", "image", "quantity", "user" ]});
+          fs.writeFileSync("./resources/product.csv", csv);
+          console.log(csv);
+          sendMail(users[i].email)
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+
     res.status(201).json(product);
   } catch (error) {
     res.json(error);
@@ -165,8 +210,8 @@ function checkPassword() {
 }
 app.post("/user", async (req, res) => {
   try {
-    if (!checkPassword()) {
-      throw "Invalid Password";
+    if(!checkPassword()){
+        throw "Invalid Password"
     }
     req.body.password = hashPassword(req.body.password);
     const userToCreate = req.body;

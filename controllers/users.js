@@ -1,5 +1,15 @@
 const User = require("../models/users");
 
+function findById(id){
+  return new Promise((resolve, reject) => {
+    try {
+      resolve(User.findById(id).exec());
+    } catch (e) {
+      console.log(e);
+      reject(false);
+    }
+  });
+}
 function findByUsername(username) {
   return new Promise((resolve, reject) => {
     try {
@@ -115,6 +125,7 @@ function getProductField(username, id) {
 }
 */
 module.exports = {
+  findById,
   findByUsername,
   findAll,
   create,
