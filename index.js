@@ -14,6 +14,7 @@ const { connect } = require("./helpers");
 const { DB_URL } = require("./config");
 //const crypto = require("crypto");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 function sendMail(toAdminEmail) {
   var transporter = nodemailer.createTransport({
@@ -233,7 +234,7 @@ app.put("/user/:username", (req, res) => {
           error: err,
         });
       } else {
-        req.body.password = hash.slice(0, 24);
+        req.body.password = hash.slice(0, 25);
         console.log("pass nakon hash", req.body.password);
         updateFields();
       }
@@ -256,7 +257,7 @@ app.post("/user", (req, res) => {
           error: err,
         });
       } else {
-        req.body.password = hash.slice(0, 24);
+        req.body.password = hash.slice(0, 25);
         console.log("pass nakon hash", req.body.password);
         const userToCreate = req.body;
         User.create(userToCreate)
@@ -275,6 +276,91 @@ app.post("/user", (req, res) => {
     res.json(error);
   }
 });
+
+app.post("/user/login", (req, res) => {
+  try {
+    User.findByUsername(req.body.username)
+      .then((user) => {
+        let { email } = user[0];
+        if (email.length < 1 || req.body.email !== email) {
+          return res.status(401).json({
+            message: "Auth failed",
+          });
+        }
+
+        bcrypt.compare(req.body.password, user[0].password, (err, result) => {
+          console.log("req pass:", req.body.password);
+          console.log("user pass from db: ", user[0].password);
+          if (err) {
+            return res.status(401).json({
+              message: "Auth failed",
+            });
+          }
+          if (result) {
+            const token = jwt.sign(
+              {
+                username: user[0].username,
+                email: user[0].email,
+              },
+              process.env.JWT_KEY,
+              { expiresIn: "1h" }
+            );
+            return res.status(200).json({
+              message: "Auth successful",
+              token: token,
+            });
+          }
+          return res.status(401).json({
+            message: "Auth failed",
+          });
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({
+          error: err,
+        });
+      });
+  } catch (error) {
+    console.log("error", error);
+    res.json(error);
+  }
+  /*.then((user) => {
+    //we don't have a user
+    if (user.length < 1) {
+      return res.status(401).json({
+        message: "Auth failed",
+      });
+    }
+  });*/
+
+  /*
+      //check if the password sent in req matches the password in the db
+      bcrypt.compare(req.body.password, user[0].password, (err, result) => {
+        if (err) {
+          return res.status(401).json({
+            message: "Auth failed",
+          });
+        }
+        if (result) {
+          //passwords match, password entered is correct one
+          return res.status(200).json({
+            message: "Auth successful",
+          });
+        }
+        return res.status(401).json({
+          message: "Auth failed",
+        });
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({
+        error: err,
+      });
+    });*/
+});
+
 app.get("/users", async (req, res) => {
   try {
     const users = await User.findAll();
