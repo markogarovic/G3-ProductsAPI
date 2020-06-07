@@ -516,11 +516,11 @@ app.patch("/user", async (req, res) => {
 // Odraditi i grupisanje (može odvojena funkcija van APIa) tako da ta funkcija
 // vraća za svakog korisnika moguću zaradu od proizvoda koji su dodati od
 // strane konkretnog korisnika
-
+let port = process.env.PORT || 5000;
 connect(DB_URL)
   .then(() =>
-    app.listen(5000, () => {
-      console.log("server on http://localhost:5000");
+    app.listen(port, () => {
+      console.log(`server on http://localhost:${port}`);
     })
   )
   .catch((e) => console.error(e));
