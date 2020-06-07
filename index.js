@@ -12,6 +12,7 @@ const User = require("./controllers/users");
 const Product = require("./controllers/products");
 const { connect } = require("./helpers");
 const { DB_URL } = require("./config");
+const checkAuth = require("./auth/check-auth");
 //const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -234,7 +235,7 @@ app.put("/user/:username", (req, res) => {
           error: err,
         });
       } else {
-        req.body.password = hash.slice(0, 25);
+        req.body.password = hash;
         console.log("pass nakon hash", req.body.password);
         updateFields();
       }
@@ -257,7 +258,7 @@ app.post("/user", (req, res) => {
           error: err,
         });
       } else {
-        req.body.password = hash.slice(0, 25);
+        req.body.password = hash;
         console.log("pass nakon hash", req.body.password);
         const userToCreate = req.body;
         User.create(userToCreate)
@@ -282,6 +283,7 @@ app.post("/user/login", (req, res) => {
     User.findByUsername(req.body.username)
       .then((user) => {
         let { email } = user[0];
+        console.log("user: ", user);
         if (email.length < 1 || req.body.email !== email) {
           return res.status(401).json({
             message: "Auth failed",
