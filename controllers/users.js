@@ -20,6 +20,18 @@ function findByUsername(username) {
     }
   });
 }
+
+function findByEmail(email) {
+  return new Promise((resolve, reject) => {
+    try {
+      resolve(User.find({ email: email }).exec());
+    } catch (e) {
+      console.log(e);
+      reject(false);
+    }
+  });
+}
+
 function findProductAndUpdate(username, id) {
   return new Promise((resolve, reject) => {
     try {
@@ -106,4 +118,5 @@ module.exports = {
   update,
   findProductAndUpdate,
   deleteProductField,
+  findByEmail,
 };
